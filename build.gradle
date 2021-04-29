@@ -11,10 +11,17 @@ plugins {
     id 'java-gradle-plugin'
 }
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    maven {
+        credentials {
+            username System.env.NEXUS_USERNAME
+            password System.env.NEXUS_PASSWORD
+        }
+        url 'https://nexus.blacklocus.com/repository/maven-public'
+    }
 }
 
 dependencies {
