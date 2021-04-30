@@ -32,7 +32,7 @@ dependencies {
 gradlePlugin {
     // Define the plugin
     plugins {
-        greeting {
+        debian {
             id = 'com.blacklocus.gradle.debian'
             implementationClass = 'com.blacklocus.gradle.debian.DebianPlugin'
         }
