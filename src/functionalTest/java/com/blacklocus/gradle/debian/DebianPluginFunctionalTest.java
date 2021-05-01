@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -28,15 +29,16 @@ public class DebianPluginFunctionalTest {
             "}");
 
         // Run the build
-        GradleRunner runner = GradleRunner.create();
-        runner.forwardOutput();
-        runner.withPluginClasspath();
-        runner.withArguments("greeting");
-        runner.withProjectDir(projectDir);
-        BuildResult result = runner.build();
+        BuildResult result = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("help", "--task", "buildDeb")
+            .forwardOutput()
+            .build();
 
         // Verify the result
-        assertTrue(result.getOutput().contains("Hello from plugin 'com.blacklocus.gradle.debian'"));
+        assertTrue(result.getOutput().contains("buildDeb"));
+        assertEquals(TaskOutcome.SUCCESS, result.task(":help").getOutcome());
     }
 
     private void writeString(File file, String string) throws IOException {

@@ -3,17 +3,39 @@
  */
 package com.blacklocus.gradle.debian;
 
-import org.gradle.api.Project;
 import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.Task;
+import org.gradle.api.distribution.plugins.DistributionPlugin;
+import org.gradle.api.plugins.ApplicationPlugin;
+import org.gradle.api.tasks.TaskProvider;
 
 /**
- * A simple 'hello world' plugin.
+ * Package java applications for Debian GNU/Linux
  */
 public class DebianPlugin implements Plugin<Project> {
+
+    private final String PLUGIN_NAME = "debian_packaging";
+
     public void apply(Project project) {
-        // Register a task
-        project.getTasks().register("greeting", task -> {
-            task.doLast(s -> System.out.println("Hello from plugin 'com.blacklocus.gradle.debian'"));
+        DebianExtension extension = project.getExtensions().create(PLUGIN_NAME, DebianExtension.class);
+        project.getPlugins().apply(ApplicationPlugin.class);
+
+        TaskProvider<BuildDeb> buildDeb = project.getTasks().register(
+                BuildDeb.TASK_NAME,
+                BuildDeb.class,
+                task -> {
+                    task.setGroup(BuildDeb.TASK_GROUP);
+                    task.setDescription(BuildDeb.TASK_DESCRIPTION);
+                    task.dependsOn(project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME));
+                });
+
+        // afterEvaluate is considered bad practice, esp. when multiple plugins use it
+        // TODO: replace with something better if possible
+        project.afterEvaluate(configuredProject -> {
+            Task installTask = configuredProject.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
+            String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
+            extension.setSourcePath(installOutputPath);
         });
     }
 }

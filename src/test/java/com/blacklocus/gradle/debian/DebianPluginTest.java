@@ -18,6 +18,6 @@ public class DebianPluginTest {
         project.getPlugins().apply("com.blacklocus.gradle.debian");
 
         // Verify the result
-        assertNotNull(project.getTasks().findByName("greeting"));
+        assertNotNull(project.getTasks().findByName("buildDeb"));
     }
 }
