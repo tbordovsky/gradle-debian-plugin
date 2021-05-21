@@ -1,0 +1,12 @@
+[Unit]
+Description=hello
+Documentation=https://github.com/blacklocus/example
+After=syslog.target network.target
+
+[Service]
+User=blacklocus
+Group=blacklocus
+Restart=on-failure
+ExecStart=/usr/bin/bl-hello
+
+LimitNOFILE=16384

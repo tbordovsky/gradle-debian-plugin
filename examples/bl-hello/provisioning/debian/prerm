@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set +e
+
+# stop all the things before uninstalling
+
+# hackery to detect Upstart and systemd
+if command -v start >/dev/null 2>&1; then
+  stop bl-hello
+elif command -v systemctl >/dev/null 2>&1; then
+  systemctl stop bl-hello.service
+else
+  echo "unknown init"
+fi
+
+# hack to exit gracefully... assuming the process isn't hung
+exit 0
