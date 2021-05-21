@@ -15,7 +15,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * A simple functional test for the 'com.blacklocus.gradle.debian.greeting' plugin.
+ * A simple functional test for the 'com.blacklocus.gradle.debian' plugin.
  */
 public class DebianPluginFunctionalTest {
     @Test public void canRunTask() throws IOException {

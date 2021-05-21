@@ -8,6 +8,7 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.distribution.plugins.DistributionPlugin;
 import org.gradle.api.plugins.ApplicationPlugin;
+import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.tasks.TaskProvider;
 
 /**
@@ -19,6 +20,7 @@ public class DebianPlugin implements Plugin<Project> {
 
     public void apply(Project project) {
         DebianExtension extension = project.getExtensions().create(PLUGIN_NAME, DebianExtension.class);
+        project.getPlugins().apply(BasePlugin.class);
         project.getPlugins().apply(ApplicationPlugin.class);
 
         TaskProvider<BuildDeb> buildDeb = project.getTasks().register(
@@ -27,15 +29,10 @@ public class DebianPlugin implements Plugin<Project> {
                 task -> {
                     task.setGroup(BuildDeb.TASK_GROUP);
                     task.setDescription(BuildDeb.TASK_DESCRIPTION);
-                    task.dependsOn(project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME));
+                    Task installTask = project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
+                    task.dependsOn(installTask);
+                    String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
+                    task.from(installOutputPath).into("/opt/blacklocus");
                 });
-
-        // afterEvaluate is considered bad practice, esp. when multiple plugins use it
-        // TODO: replace with something better if possible
-        project.afterEvaluate(configuredProject -> {
-            Task installTask = configuredProject.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
-            String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
-            extension.setSourcePath(installOutputPath);
-        });
     }
 }

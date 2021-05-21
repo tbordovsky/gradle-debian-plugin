@@ -1,5 +1,6 @@
 package com.blacklocus.gradle.debian;
 
+import org.apache.commons.io.FileUtils;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
@@ -17,7 +18,10 @@ import org.vafer.jdeb.PackagingException;
 import org.vafer.jdeb.producers.DataProducerDirectory;
 import org.vafer.jdeb.producers.DataProducerFile;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,25 +29,28 @@ public class DebCopyAction implements CopyAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebCopyAction.class);
 
+    private final BuildDeb task;
     private final File tempDir;
     private final File debianDir;
+    private final File rootDir;
     private final File debFile;
     private final List<DataProducer> dataProducers = new ArrayList<>();
     private final List<DataProducer> confProducers = new ArrayList<>();
 
-    public DebCopyAction(File tempDir, File debianDir, File debFile) {
-        this.debianDir = debianDir;
+    // probably just need to pass in the task, everything can be derived from its extension
+    public DebCopyAction(BuildDeb task, File tempDir, File debianDir, File rootDir, File debFile) {
+        this.task = task;
         this.tempDir = tempDir;
+        this.debianDir = debianDir;
+        this.rootDir = rootDir;
         this.debFile = debFile;
     }
 
     @Override
     public WorkResult execute(CopyActionProcessingStream stream) {
         try {
-            debianDir.delete();
-            debianDir.mkdirs();
-
             stream.process(fileCopyDetails -> {
+                LOG.info("Streaming: " + fileCopyDetails.getPath());
                 if (fileCopyDetails.isDirectory()) {
                     addDirectory(fileCopyDetails);
                 } else {
@@ -51,8 +58,13 @@ public class DebCopyAction implements CopyAction {
                 }
             });
 
+            FileUtils.copyDirectory(rootDir, task.getTemporaryDir());
+            File targetDebianDir = new File(task.getTemporaryDir(), "debian");
+            FileUtils.copyDirectory(debianDir, targetDebianDir);
+            generateMaintainerScripts(targetDebianDir);
+
             DebMaker maker = new DebMaker(new GradleLoggerConsole(), dataProducers, confProducers);
-            maker.setControl(debianDir);
+            maker.setControl(targetDebianDir);
             maker.setDeb(debFile);
 
             try {
@@ -63,30 +75,59 @@ public class DebCopyAction implements CopyAction {
                 throw new GradleException("Can't build debian package " + debFile, e);
             }
         } catch (Exception e) {
+            // TODO use something besides this gradle internal class
             UncheckedException.throwAsUncheckedException(e);
         }
         return WorkResults.didWork(true);
     }
 
+    private void generateMaintainerScripts(File tmpDebianDir) {
+        File control = new File(tmpDebianDir, "control");
+        if (!control.exists()) {
+            try {
+                String content = String.join("\n",
+                        "Package: " + task.getProject().getName(),
+                        "Version: " + task.getProject().getVersion(),
+                        "License: unknown",
+                        "Vendor: BlackLocus",
+                        "Architecture: all",
+                        "Maintainer: <root@localhost>",
+                        "Section: default",
+                        "Priority: extra",
+                        "Homepage: http://example.com/no-uri-given",
+                        "Description: no description given"
+                        );
+
+                control.createNewFile();
+                FileWriter fw = new FileWriter(control.getAbsoluteFile());
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(content);
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
     private void addFile(FileCopyDetailsInternal fileCopyDetails) {
-//        String user = lookup(specToLookAt, 'user') ?: task.user
-//        Integer uid = (Integer) lookup(specToLookAt, 'uid') ?: task.uid ?: 0
-//        String group = lookup(specToLookAt, 'permissionGroup') ?: task.permissionGroup
-//        Integer gid = (Integer) lookup(specToLookAt, 'gid') ?: task.gid ?: 0
-//
+        // we can manage file attributes here if necessary, e.g., users, groups, etc.
 //        int fileMode = fileDetails.mode
-//
-//        debFileVisitorStrategy.addFile(fileDetails, inputFile, user, uid, group, gid, fileMode)
-        File inputFile = fileCopyDetails.getFile();
+        File target = new File(tempDir, fileCopyDetails.getPath());
+        LOG.info("Copying {} to {}", fileCopyDetails, target);
+        fileCopyDetails.copyTo(target);
         // probably need to implement a DataProducer with users and groups here
-        DataProducer dataProducer = new DataProducerFile(inputFile, debianDir.getPath(), null, null, null);
+        DataProducer dataProducer = new DataProducerFile(target, tempDir.getPath(), null, null, null);
         dataProducers.add(dataProducer);
     }
 
     private void addDirectory(FileCopyDetailsInternal fileCopyDetails) {
-        File inputDirectory = fileCopyDetails.getFile();
+        File target = new File(tempDir, fileCopyDetails.getPath());
+        LOG.info("Copying {} to {}", fileCopyDetails, target);
+        fileCopyDetails.copyTo(target);
+
         // probably need to implement a DataProducer with users and groups here
-        DataProducer dataProducer = new DataProducerDirectory(inputDirectory, new String[]{}, new String[]{}, null);
+        DataProducer dataProducer = new DataProducerDirectory(target, new String[]{}, new String[]{}, null);
         dataProducers.add(dataProducer);
     }
 
