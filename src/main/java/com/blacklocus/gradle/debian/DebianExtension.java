@@ -1,7 +1,5 @@
 package com.blacklocus.gradle.debian;
 
-import org.gradle.api.Project;
-import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.model.ObjectFactory;
 
@@ -11,7 +9,6 @@ public class DebianExtension {
 
     private final DirectoryProperty debianDirectory;
     private final DirectoryProperty provisioningDirectory;
-
 
     @Inject
     public DebianExtension(ObjectFactory objectFactory) {
