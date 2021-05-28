@@ -38,4 +38,5 @@ application {
 debian_packaging {
     debianDirectory = layout.projectDirectory.dir('provisioning/debian')
     provisioningDirectory = layout.projectDirectory.dir('provisioning/root')
+    installPath = '/opt/provider'
 }
