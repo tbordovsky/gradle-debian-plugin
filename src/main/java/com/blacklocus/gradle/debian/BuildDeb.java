@@ -3,8 +3,6 @@ package com.blacklocus.gradle.debian;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 
-import java.io.File;
-
 public class BuildDeb extends AbstractArchiveTask {
 
     public static final String TASK_NAME = "buildDeb";
