@@ -20,7 +20,7 @@ public class BuildDeb extends AbstractArchiveTask {
         return new DebCopyAction(
                 this,
                 this.getTemporaryDir(),
-                extension.getDebianDirectory(),
+                extension.getDebianDirectory().get(),
                 this.getArchiveFile().get().getAsFile());
     }
 }
