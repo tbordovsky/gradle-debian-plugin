@@ -36,7 +36,8 @@ application {
 }
 
 debian_packaging {
-    debianDirectory = layout.projectDirectory.dir('provisioning/debian')
-    provisioningDirectory = layout.projectDirectory.dir('provisioning/root')
+    provisioningDirectory = file('provisioning/root')
     installPath = '/opt/provider'
+    postInstallFile = file('provisioning/debian/postinst')
+    preUninstallFile = file('provisioning/debian/prerm')
 }

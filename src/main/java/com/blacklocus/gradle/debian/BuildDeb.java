@@ -34,6 +34,10 @@ public class BuildDeb extends AbstractArchiveTask {
 
     private static final Logger LOG = Logging.getLogger(BuildDeb.class);
 
+    protected static final String CONTROL_DIRECTORY_PATH = "/debian";
+    protected static final String DEFAULT_INSTALL_PATH = "/opt";
+    protected static final String PROVISIONING_PATH = "/";
+
     private final List<DataProducer> dataProducers = new ArrayList<>();
     private final List<DataProducer> confProducers = new ArrayList<>();
 
@@ -45,9 +49,21 @@ public class BuildDeb extends AbstractArchiveTask {
     protected void configureArchiveCopySpecs(Project project, DebianExtension extension) {
         Task installTask = project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
         String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
-        CopySpec dataCopySpec = project.copySpec(copy -> copy.from(installOutputPath).into(extension.getInstallPath().convention("/opt")));
-        CopySpec controlCopySpec = project.copySpec(copy -> copy.from(extension.getDebianDirectory()).into("/debian"));
-        CopySpec rootfsCopySpec = project.copySpec(copy -> copy.from(extension.getProvisioningDirectory())).into("/");
+        CopySpec dataCopySpec = project.copySpec(copy -> copy
+                .from(installOutputPath)
+                .into(extension.getInstallPath().convention(DEFAULT_INSTALL_PATH)));
+        CopySpec controlCopySpec = project.copySpec(copy -> copy
+                .from(extension.getPreInstallFile().getOrNull())
+                .from(extension.getPostInstallFile().getOrNull())
+                .from(extension.getPreUninstallFile().getOrNull())
+                .from(extension.getPostUninstallFile().getOrNull())
+                .from(extension.getTriggerInstallFile().getOrNull())
+                .from(extension.getTriggerUninstallFile().getOrNull())
+                .from(extension.getTriggerPostUninstallFile().getOrNull())
+                .into(CONTROL_DIRECTORY_PATH));
+        CopySpec rootfsCopySpec = project.copySpec(copy -> copy
+                .from(extension.getProvisioningDirectory()))
+                .into(PROVISIONING_PATH);
         this.with(dataCopySpec, controlCopySpec, rootfsCopySpec);
     }
 
@@ -66,12 +82,12 @@ public class BuildDeb extends AbstractArchiveTask {
         WorkResult didWork = copyActionExecuter.execute(this.getRootSpec(), copyAction);
         this.setDidWork(didWork.getDidWork());
 
-        File targetDebianDir = new File(this.getTemporaryDir(), "debian");
-        generateMaintainerScripts(targetDebianDir);
+        File controlDir = new File(this.getTemporaryDir(), CONTROL_DIRECTORY_PATH);
+        generateMaintainerScripts(controlDir);
 
         File debFile = this.getArchiveFile().get().getAsFile();
         DebMaker maker = new DebMaker(new GradleLoggerConsole(), dataProducers, confProducers);
-        maker.setControl(targetDebianDir);
+        maker.setControl(controlDir);
         maker.setDeb(debFile);
 
         try {
@@ -84,12 +100,7 @@ public class BuildDeb extends AbstractArchiveTask {
 
     @Override
     protected CopyAction createCopyAction() {
-        DebianExtension extension = this.getProject().getExtensions().findByType(DebianExtension.class);
-        return new DebCopyAction(
-                this.getTemporaryDir(),
-                extension.getDebianDirectory().get(),
-                dataProducers,
-                confProducers);
+        return new DebCopyAction(this.getTemporaryDir(), dataProducers);
     }
 
     private void generateMaintainerScripts(File tmpDebianDir) {
@@ -100,7 +111,7 @@ public class BuildDeb extends AbstractArchiveTask {
                         "Package: " + this.getProject().getName(),
                         "Version: " + this.getArchiveVersion().getOrElse("0"),
                         "License: unknown",
-                        "Vendor: BlackLocus",
+                        "Vendor: vendor",
                         "Architecture: all",
                         "Maintainer: <root@localhost>",
                         "Section: default",

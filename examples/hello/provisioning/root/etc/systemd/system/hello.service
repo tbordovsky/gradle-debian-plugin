@@ -1,0 +1,12 @@
+[Unit]
+Description=hello
+Documentation=https://github.com/gradle-debian-plugin/example/hello
+After=syslog.target network.target
+
+[Service]
+User=user
+Group=group
+Restart=on-failure
+ExecStart=/usr/bin/hello
+
+LimitNOFILE=16384

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+readonly app_name=hello
+
+cd /opt/$app_name
+./bin/$app_name server >> /var/log/$app_name.log 2>&1

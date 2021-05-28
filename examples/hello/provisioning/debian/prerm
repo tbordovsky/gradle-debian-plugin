@@ -1,17 +1,23 @@
-#!/usr/bin/env bash
+#!/bin/sh -e
 
-set +e
+case "$1" in
+    remove)
+      echo "Before the package is removed, e.g., "
+      systemctl stop hello.service
+    ;;
+    upgrade)
+      echo "Before an upgrade."
+    ;;
+    failed-upgrade)
+      echo "If the above upgrade fails."
+    ;;
+    deconfigure)
+      echo "Before package is deconfigured."
+    ;;
+    *)
+      echo "prerm called with unknown argument \`$1'" >&2
+      exit 1
+    ;;
+esac
 
-# stop all the things before uninstalling
-
-# hackery to detect Upstart and systemd
-if command -v start >/dev/null 2>&1; then
-  stop bl-hello
-elif command -v systemctl >/dev/null 2>&1; then
-  systemctl stop bl-hello.service
-else
-  echo "unknown init"
-fi
-
-# hack to exit gracefully... assuming the process isn't hung
 exit 0

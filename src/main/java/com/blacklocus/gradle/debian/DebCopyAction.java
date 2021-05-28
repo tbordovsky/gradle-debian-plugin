@@ -1,6 +1,5 @@
 package com.blacklocus.gradle.debian;
 
-import org.gradle.api.file.Directory;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
@@ -20,19 +19,11 @@ public class DebCopyAction implements CopyAction {
     private static final Logger LOG = Logging.getLogger(DebCopyAction.class);
 
     private final File targetDir;
-    private final Directory debianDir;
     private final List<DataProducer> dataProducers;
-    private final List<DataProducer> confProducers;
 
-    // probably just need to pass in the task, everything can be derived from its extension
-    public DebCopyAction(File targetDir,
-                         Directory debianDir,
-                         List<DataProducer> dataProducers,
-                         List<DataProducer> confProducers) {
+    public DebCopyAction(File targetDir, List<DataProducer> dataProducers) {
         this.targetDir = targetDir;
-        this.debianDir = debianDir;
         this.dataProducers = dataProducers;
-        this.confProducers = confProducers;
     }
 
     @Override
@@ -53,7 +44,7 @@ public class DebCopyAction implements CopyAction {
         LOG.info("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
 
-        if (!debianDir.getAsFileTree().contains(fileCopyDetails.getFile())) {
+        if (!isControlFile(fileCopyDetails)) {
             DataProducer dataProducer = new DataProducerFile(target, fileCopyDetails.getPath(), null, null, null);
             dataProducers.add(dataProducer);
         }
@@ -66,6 +57,11 @@ public class DebCopyAction implements CopyAction {
 
         DataProducer dataProducer = new DataProducerDirectory(target, new String[]{}, new String[]{}, null);
         dataProducers.add(dataProducer);
+    }
+
+    private static Boolean isControlFile(FileCopyDetailsInternal fileCopyDetails) {
+        // comparing to relative paths, so take off the leading /
+        return fileCopyDetails.getPath().startsWith(BuildDeb.CONTROL_DIRECTORY_PATH.substring(1));
     }
 
 }
