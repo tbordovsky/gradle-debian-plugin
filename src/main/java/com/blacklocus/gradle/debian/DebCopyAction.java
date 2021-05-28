@@ -5,11 +5,11 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.api.tasks.WorkResults;
 import org.gradle.internal.UncheckedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vafer.jdeb.Compression;
 import org.vafer.jdeb.Console;
 import org.vafer.jdeb.DataProducer;
@@ -27,7 +27,7 @@ import java.util.List;
 
 public class DebCopyAction implements CopyAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DebCopyAction.class);
+    private static final Logger LOG = Logging.getLogger(DebCopyAction.class);
 
     private final BuildDeb task;
     private final File tempDir;
@@ -48,7 +48,6 @@ public class DebCopyAction implements CopyAction {
     public WorkResult execute(CopyActionProcessingStream stream) {
         try {
             stream.process(fileCopyDetails -> {
-                LOG.info("Streaming: " + fileCopyDetails.getPath());
                 if (fileCopyDetails.isDirectory()) {
                     addDirectory(fileCopyDetails);
                 } else {
@@ -64,7 +63,6 @@ public class DebCopyAction implements CopyAction {
             maker.setDeb(debFile);
 
             try {
-                LOG.info("Creating debian package: {}", debFile);
                 maker.setCompression(Compression.GZIP.toString());
                 maker.makeDeb();
             } catch (PackagingException e) {
@@ -138,7 +136,7 @@ public class DebCopyAction implements CopyAction {
 
         @Override
         public void info(String message) {
-            LOG.info(message);
+            LOG.quiet(message);
         }
 
         @Override
