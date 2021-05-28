@@ -7,13 +7,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    maven {
-        credentials {
-            username System.env.NEXUS_USERNAME
-            password System.env.NEXUS_PASSWORD
-        }
-        url 'https://nexus.blacklocus.com/repository/maven-public'
-    }
+    mavenCentral()
 }
 
 dependencies {
