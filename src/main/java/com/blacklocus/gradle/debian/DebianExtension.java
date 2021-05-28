@@ -1,16 +1,26 @@
 package com.blacklocus.gradle.debian;
 
-import java.io.File;
+import org.gradle.api.file.Directory;
 
 public class DebianExtension {
 
-    private String sourcePath;
+    private Directory debianDirectory;
 
-    public void setSourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
+    public Directory getDebianDirectory() {
+        return debianDirectory;
     }
 
-    public String getSourcePath() {
-        return sourcePath;
+    public void setDebianDirectory(Directory debianDirectory) {
+        this.debianDirectory = debianDirectory;
+    }
+
+    private Directory provisioningDirectory;
+
+    public Directory getProvisioningDirectory() {
+        return provisioningDirectory;
+    }
+
+    public void setProvisioningDirectory(Directory provisioningDirectory) {
+        this.provisioningDirectory = provisioningDirectory;
     }
 }

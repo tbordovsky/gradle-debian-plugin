@@ -1,7 +1,7 @@
 package com.blacklocus.gradle.debian;
 
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.Directory;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
@@ -31,18 +31,16 @@ public class DebCopyAction implements CopyAction {
 
     private final BuildDeb task;
     private final File tempDir;
-    private final File debianDir;
-    private final File rootDir;
+    private final Directory debianDir;
     private final File debFile;
     private final List<DataProducer> dataProducers = new ArrayList<>();
     private final List<DataProducer> confProducers = new ArrayList<>();
 
     // probably just need to pass in the task, everything can be derived from its extension
-    public DebCopyAction(BuildDeb task, File tempDir, File debianDir, File rootDir, File debFile) {
+    public DebCopyAction(BuildDeb task, File tempDir, Directory debianDir, File debFile) {
         this.task = task;
         this.tempDir = tempDir;
         this.debianDir = debianDir;
-        this.rootDir = rootDir;
         this.debFile = debFile;
     }
 
@@ -58,9 +56,7 @@ public class DebCopyAction implements CopyAction {
                 }
             });
 
-            FileUtils.copyDirectory(rootDir, task.getTemporaryDir());
-            File targetDebianDir = new File(task.getTemporaryDir(), "debian");
-            FileUtils.copyDirectory(debianDir, targetDebianDir);
+            File targetDebianDir = new File(tempDir, "debian");
             generateMaintainerScripts(targetDebianDir);
 
             DebMaker maker = new DebMaker(new GradleLoggerConsole(), dataProducers, confProducers);
@@ -116,9 +112,12 @@ public class DebCopyAction implements CopyAction {
         File target = new File(tempDir, fileCopyDetails.getPath());
         LOG.info("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
-        // probably need to implement a DataProducer with users and groups here
-        DataProducer dataProducer = new DataProducerFile(target, tempDir.getPath(), null, null, null);
-        dataProducers.add(dataProducer);
+
+        if (!debianDir.getAsFileTree().contains(fileCopyDetails.getFile())) {
+            // probably need to implement a DataProducer with users and groups here
+            DataProducer dataProducer = new DataProducerFile(target, fileCopyDetails.getPath(), null, null, null);
+            dataProducers.add(dataProducer);
+        }
     }
 
     private void addDirectory(FileCopyDetailsInternal fileCopyDetails) {

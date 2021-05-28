@@ -7,6 +7,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.distribution.plugins.DistributionPlugin;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.plugins.ApplicationPlugin;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.tasks.TaskProvider;
@@ -32,7 +33,10 @@ public class DebianPlugin implements Plugin<Project> {
                     Task installTask = project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
                     task.dependsOn(installTask);
                     String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
-                    task.from(installOutputPath).into("/opt/blacklocus");
+                    CopySpec dataCopySpec = project.copySpec(copy -> copy.from(installOutputPath).into("/opt/blacklocus"));
+                    CopySpec controlCopySpec = project.copySpec(copy -> copy.from(extension.getDebianDirectory()).into("/debian"));
+                    CopySpec rootfsCopySpec = project.copySpec(copy -> copy.from(extension.getProvisioningDirectory())).into("/");
+                    task.with(dataCopySpec, controlCopySpec, rootfsCopySpec);
                 });
     }
 }

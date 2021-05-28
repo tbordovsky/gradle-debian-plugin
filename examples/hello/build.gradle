@@ -34,3 +34,8 @@ application {
     // Define the main class for the application.
     mainClassName = 'hello.App'
 }
+
+debian_packaging {
+    debianDirectory = layout.projectDirectory.dir('provisioning/debian')
+    provisioningDirectory = layout.projectDirectory.dir('provisioning/root')
+}

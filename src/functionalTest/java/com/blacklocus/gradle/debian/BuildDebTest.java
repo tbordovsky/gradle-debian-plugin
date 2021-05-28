@@ -15,7 +15,7 @@ public class BuildDebTest {
     @Test
     public void canRunTask() throws IOException {
         // Setup the test build
-        File projectDir = new File("examples/bl-hello");
+        File projectDir = new File("examples/hello");
 
         // Run the build
         BuildResult result = GradleRunner.create()

@@ -18,11 +18,11 @@ public class BuildDeb extends AbstractArchiveTask {
 
     @Override
     protected CopyAction createCopyAction() {
+        DebianExtension extension = this.getProject().getExtensions().findByType(DebianExtension.class);
         return new DebCopyAction(
                 this,
                 this.getTemporaryDir(),
-                new File(this.getProject().getProjectDir(),"provisioning/debian"),
-                new File(this.getProject().getProjectDir(),"provisioning/root"),
+                extension.getDebianDirectory(),
                 this.getArchiveFile().get().getAsFile());
     }
 }

@@ -17,7 +17,7 @@ public class DebugBuildDeb {
 
     @Test
     public void debug() {
-        File testProjectDir = new File("examples/bl-hello");
+        File testProjectDir = new File("examples/hello");
 
         // Run the build
         BuildResult result = GradleRunner.create()
