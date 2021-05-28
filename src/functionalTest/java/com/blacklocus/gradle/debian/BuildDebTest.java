@@ -21,7 +21,7 @@ public class BuildDebTest {
         BuildResult result = GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(projectDir)
-                .withArguments("buildDeb")
+                .withArguments("clean", "buildDeb")
                 .forwardOutput()
                 .build();
 
