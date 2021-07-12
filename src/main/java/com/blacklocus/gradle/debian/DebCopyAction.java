@@ -8,6 +8,8 @@ import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.api.tasks.WorkResults;
 import org.vafer.jdeb.DataProducer;
+import org.vafer.jdeb.mapping.Mapper;
+import org.vafer.jdeb.mapping.PermMapper;
 import org.vafer.jdeb.producers.DataProducerDirectory;
 import org.vafer.jdeb.producers.DataProducerFile;
 
@@ -41,27 +43,32 @@ public class DebCopyAction implements CopyAction {
     private void addFile(FileCopyDetailsInternal fileCopyDetails) {
         // we can manage file attributes here if necessary, e.g., users, groups, etc.
         File target = new File(targetDir, fileCopyDetails.getPath());
-        LOG.info("Copying {} to {}", fileCopyDetails, target);
+        LOG.debug("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
 
         if (!isControlFile(fileCopyDetails)) {
-            DataProducer dataProducer = new DataProducerFile(target, fileCopyDetails.getPath(), null, null, null);
+            // this mapper is required in order to preserve the file mode
+            Mapper mapper = new PermMapper(-1, -1, null, null, fileCopyDetails.getMode(), -1, -1, null);
+            DataProducer dataProducer = new DataProducerFile(
+                    target, fileCopyDetails.getPath(), null, null, new Mapper[]{mapper});
             dataProducers.add(dataProducer);
         }
     }
 
     private void addDirectory(FileCopyDetailsInternal fileCopyDetails) {
         File target = new File(targetDir, fileCopyDetails.getPath());
-        LOG.info("Copying {} to {}", fileCopyDetails, target);
+        LOG.debug("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
 
-        DataProducer dataProducer = new DataProducerDirectory(target, new String[]{}, new String[]{}, null);
+        // this mapper is required in order to preserve the dir mode
+        Mapper mapper = new PermMapper(-1, -1, null, null, fileCopyDetails.getMode(), -1, -1, null);
+        DataProducer dataProducer = new DataProducerDirectory(target, new String[]{}, new String[]{}, new Mapper[]{mapper});
         dataProducers.add(dataProducer);
     }
 
     private static Boolean isControlFile(FileCopyDetailsInternal fileCopyDetails) {
         // comparing to relative paths, so take off the leading /
-        return fileCopyDetails.getPath().startsWith(BuildDeb.CONTROL_DIRECTORY_PATH.substring(1));
+        return fileCopyDetails.getPath().startsWith(BuildDeb.ARCHIVE_CONTROL_PATH.substring(1));
     }
 
 }

@@ -15,14 +15,14 @@ import org.gradle.api.tasks.TaskProvider;
  */
 public class DebianPlugin implements Plugin<Project> {
 
-    private final String PLUGIN_NAME = "debian_packaging";
+    private static final String PLUGIN_NAME = "debian_packaging";
 
     public void apply(Project project) {
         DebianExtension extension = project.getExtensions().create(PLUGIN_NAME, DebianExtension.class);
         project.getPlugins().apply(BasePlugin.class);
         project.getPlugins().apply(ApplicationPlugin.class);
 
-        TaskProvider<BuildDeb> buildDeb = project.getTasks().register(
+        project.getTasks().register(
                 BuildDeb.TASK_NAME,
                 BuildDeb.class,
                 task -> {

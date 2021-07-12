@@ -4,7 +4,6 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
@@ -15,10 +14,10 @@ import javax.inject.Inject;
 
 public class DebianExtension {
 
-    private final DirectoryProperty provisioningDirectory;
     private final Property<String> installPath;
-    private RegularFileProperty preInstallFile;
-    private RegularFileProperty postInstallFile;
+    private final DirectoryProperty provisioningDirectory;
+    private final RegularFileProperty preInstallFile;
+    private final RegularFileProperty postInstallFile;
     private final RegularFileProperty preUninstallFile;
     private final RegularFileProperty postUninstallFile;
     private final RegularFileProperty triggerInstallFile;
@@ -27,8 +26,8 @@ public class DebianExtension {
 
     @Inject
     public DebianExtension(ObjectFactory objectFactory) {
-        this.provisioningDirectory = objectFactory.directoryProperty();
         this.installPath = objectFactory.property(String.class);
+        this.provisioningDirectory = objectFactory.directoryProperty();
         this.preInstallFile = objectFactory.fileProperty();
         this.postInstallFile = objectFactory.fileProperty();
         this.preUninstallFile = objectFactory.fileProperty();
@@ -38,16 +37,16 @@ public class DebianExtension {
         this.triggerPostUninstallFile = objectFactory.fileProperty();
     }
 
-    @InputDirectory
-    @Optional
-    public DirectoryProperty getProvisioningDirectory() {
-        return provisioningDirectory;
-    }
-
-    @Input
     @Optional
     public Property<String> getInstallPath() {
         return installPath;
+    }
+
+    @InputDirectory
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public DirectoryProperty getProvisioningDirectory() {
+        return provisioningDirectory;
     }
 
     @InputFile

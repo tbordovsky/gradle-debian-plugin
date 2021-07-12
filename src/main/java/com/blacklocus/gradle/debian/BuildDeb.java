@@ -5,6 +5,8 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.distribution.plugins.DistributionPlugin;
 import org.gradle.api.file.CopySpec;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionExecuter;
 import org.gradle.api.logging.Logger;
@@ -24,7 +26,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BuildDeb extends AbstractArchiveTask {
 
@@ -34,9 +40,9 @@ public class BuildDeb extends AbstractArchiveTask {
 
     private static final Logger LOG = Logging.getLogger(BuildDeb.class);
 
-    protected static final String CONTROL_DIRECTORY_PATH = "/debian";
+    protected static final String ARCHIVE_CONTROL_PATH = "/debian";
+    protected static final String ARCHIVE_PROVISIONING_PATH = "/";
     protected static final String DEFAULT_INSTALL_PATH = "/opt";
-    protected static final String PROVISIONING_PATH = "/";
 
     private final List<DataProducer> dataProducers = new ArrayList<>();
     private final List<DataProducer> confProducers = new ArrayList<>();
@@ -47,24 +53,47 @@ public class BuildDeb extends AbstractArchiveTask {
     }
 
     protected void configureArchiveCopySpecs(Project project, DebianExtension extension) {
+        LOG.info("Configure copy specs for debian archive.");
+
         Task installTask = project.getTasks().getByName(DistributionPlugin.TASK_INSTALL_NAME);
-        String installOutputPath = installTask.getOutputs().getFiles().getSingleFile().getParent();
+        String javaInstallDirectory = installTask.getOutputs().getFiles().getSingleFile().getParent();
+        LOG.info("Collecting java files from javaInstallDirectory: {}", javaInstallDirectory);
+        String archiveInstallPath = extension.getInstallPath().getOrElse(DEFAULT_INSTALL_PATH);
         CopySpec dataCopySpec = project.copySpec(copy -> copy
-                .from(installOutputPath)
-                .into(extension.getInstallPath().convention(DEFAULT_INSTALL_PATH)));
-        CopySpec controlCopySpec = project.copySpec(copy -> copy
-                .from(extension.getPreInstallFile().getOrNull())
-                .from(extension.getPostInstallFile().getOrNull())
-                .from(extension.getPreUninstallFile().getOrNull())
-                .from(extension.getPostUninstallFile().getOrNull())
-                .from(extension.getTriggerInstallFile().getOrNull())
-                .from(extension.getTriggerUninstallFile().getOrNull())
-                .from(extension.getTriggerPostUninstallFile().getOrNull())
-                .into(CONTROL_DIRECTORY_PATH));
-        CopySpec rootfsCopySpec = project.copySpec(copy -> copy
-                .from(extension.getProvisioningDirectory()))
-                .into(PROVISIONING_PATH);
-        this.with(dataCopySpec, controlCopySpec, rootfsCopySpec);
+                .from(javaInstallDirectory)
+                .into(archiveInstallPath));
+        this.with(dataCopySpec);
+
+        Set<RegularFile> controlFiles = getControlFiles(extension);
+        if (!controlFiles.isEmpty()) {
+            LOG.info("Collecting control files: {}", controlFiles);
+            CopySpec controlCopySpec = project.copySpec(copy -> copy
+                    .from(controlFiles)
+                    .into(ARCHIVE_CONTROL_PATH));
+            this.with(controlCopySpec);
+        }
+
+        DirectoryProperty provisioningDirectory = extension.getProvisioningDirectory();
+        LOG.info("provisioningDirectory source: {}", provisioningDirectory.getOrNull());
+        if (provisioningDirectory.isPresent()) {
+            LOG.info("Collecting provisioning files from directory: {}", provisioningDirectory);
+            CopySpec rootfsCopySpec = project.copySpec(copy -> copy
+                    .from(provisioningDirectory.get()))
+                    .into(ARCHIVE_PROVISIONING_PATH);
+            this.with(rootfsCopySpec);
+        }
+    }
+
+    private Set<RegularFile> getControlFiles(DebianExtension extension) {
+        Set<RegularFile> controlFiles = new HashSet<>();
+        controlFiles.add(extension.getPreInstallFile().getOrNull());
+        controlFiles.add(extension.getPostInstallFile().getOrNull());
+        controlFiles.add(extension.getPreUninstallFile().getOrNull());
+        controlFiles.add(extension.getPostUninstallFile().getOrNull());
+        controlFiles.add(extension.getTriggerInstallFile().getOrNull());
+        controlFiles.add(extension.getTriggerUninstallFile().getOrNull());
+        controlFiles.add(extension.getTriggerPostUninstallFile().getOrNull());
+        return controlFiles.stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @OutputFile
@@ -82,16 +111,17 @@ public class BuildDeb extends AbstractArchiveTask {
         WorkResult didWork = copyActionExecuter.execute(this.getRootSpec(), copyAction);
         this.setDidWork(didWork.getDidWork());
 
-        File controlDir = new File(this.getTemporaryDir(), CONTROL_DIRECTORY_PATH);
+        File controlDir = new File(this.getTemporaryDir(), ARCHIVE_CONTROL_PATH);
+        controlDir.mkdir();
         generateMaintainerScripts(controlDir);
 
         File debFile = this.getArchiveFile().get().getAsFile();
         DebMaker maker = new DebMaker(new GradleLoggerConsole(), dataProducers, confProducers);
         maker.setControl(controlDir);
         maker.setDeb(debFile);
+        maker.setCompression(Compression.GZIP.toString());
 
         try {
-            maker.setCompression(Compression.GZIP.toString());
             maker.makeDeb();
         } catch (PackagingException e) {
             throw new GradleException("Can't build debian package " + debFile, e);
