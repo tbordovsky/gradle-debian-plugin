@@ -1,7 +1,5 @@
 package com.blacklocus.gradle.debian;
 
-
-import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.Ignore;
 import org.junit.Test;
