@@ -1,20 +1,17 @@
 plugins {
-    // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     id 'java-gradle-plugin'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation group: 'org.vafer', name: 'jdeb', version: '1.8'
-
-    testImplementation 'junit:junit:4.12'
-}
+sourceSets.create('functionalTest')
 
 gradlePlugin {
     plugins {
@@ -23,25 +20,26 @@ gradlePlugin {
             implementationClass = 'com.blacklocus.gradle.debian.DebianPlugin'
         }
     }
+    testSourceSets(sourceSets.functionalTest)
 }
 
-// Add a source set for the functional test suite
-sourceSets {
-    functionalTest {
-    }
+dependencies {
+    implementation group: 'org.vafer', name: 'jdeb', version: '1.8'
+
+    testImplementation 'junit:junit:4.12'
+
+    functionalTestImplementation 'junit:junit:4.12'
+    functionalTestImplementation(project)
 }
 
-gradlePlugin.testSourceSets(sourceSets.functionalTest)
-configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
-configurations.functionalTestRuntimeOnly.extendsFrom(configurations.testRuntimeOnly)
-
-// Add a task to run the functional tests
-task functionalTest(type: Test) {
+/**
+ * TestKit determines the plugin classpath by running a specific Gradle task. You will need to execute the assemble task
+ * to initially generate the plugin classpath or to reflect changes to it even when running TestKit-based functional
+ * tests from the IDE
+ */
+tasks.register('functionalTest', Test) {
+    description = 'Runs the functional tests.'
+    group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
-}
-
-check {
-    // Run the functional tests as part of `check`
-    dependsOn(tasks.functionalTest)
 }
