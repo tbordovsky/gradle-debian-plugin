@@ -5,9 +5,6 @@ import org.gradle.api.Project;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- * A simple unit test for the 'com.blacklocus.gradle.debian.greeting' plugin.
- */
 public class DebianPluginTest {
     @Test public void pluginRegistersATask() {
         // Create a test project and apply the plugin
