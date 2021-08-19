@@ -20,7 +20,7 @@ gradlePlugin {
             implementationClass = 'com.blacklocus.gradle.debian.DebianPlugin'
         }
     }
-    testSourceSets(sourceSets.functionalTest)
+    testSourceSets(sourceSets.functionalTest) // inject gradleTestKit
 }
 
 dependencies {

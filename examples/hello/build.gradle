@@ -49,3 +49,8 @@ debian_packaging {
     maintainer = '<root@localhost>'
     description = 'A single line synopsis'
 }
+
+buildDeb {
+    // this is just to make sure the task actually runs under test :)
+    outputs.upToDateWhen { false }
+}

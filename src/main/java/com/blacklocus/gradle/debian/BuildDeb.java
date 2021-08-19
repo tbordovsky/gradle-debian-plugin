@@ -1,6 +1,5 @@
 package com.blacklocus.gradle.debian;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.distribution.plugins.DistributionPlugin;
@@ -13,6 +12,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskExecutionException;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.vafer.jdeb.Compression;
@@ -123,8 +123,8 @@ public class BuildDeb extends AbstractArchiveTask {
 
         try {
             maker.makeDeb();
-        } catch (PackagingException e) {
-            throw new GradleException("Can't build debian package " + debFile, e);
+        } catch (PackagingException ex) {
+            throw new TaskExecutionException(this, ex);
         }
     }
 

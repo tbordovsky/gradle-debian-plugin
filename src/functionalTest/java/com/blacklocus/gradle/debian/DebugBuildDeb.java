@@ -16,7 +16,7 @@ public class DebugBuildDeb {
         GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(TEST_PROJECT_DIR)
-                .withArguments("buildDeb", "--info", "--rerun-tasks")
+                .withArguments("buildDeb", "--info")
                 .forwardOutput()
                 .withDebug(true)
                 .build();
