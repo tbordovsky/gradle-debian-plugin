@@ -113,7 +113,7 @@ public class BuildDeb extends AbstractArchiveTask {
 
         File controlDir = new File(this.getTemporaryDir(), ARCHIVE_CONTROL_PATH);
         controlDir.mkdir();
-        generateMaintainerScripts(controlDir);
+        generateControlFile(controlDir, extension);
 
         File debFile = this.getArchiveFile().get().getAsFile();
         DebMaker maker = new DebMaker(new GradleLoggerConsole(), dataProducers, confProducers);
@@ -133,21 +133,18 @@ public class BuildDeb extends AbstractArchiveTask {
         return new DebCopyAction(this.getTemporaryDir(), dataProducers);
     }
 
-    private void generateMaintainerScripts(File tmpDebianDir) {
+    private void generateControlFile(File tmpDebianDir, DebianExtension extension) {
         File control = new File(tmpDebianDir, "control");
         if (!control.exists()) {
             try {
                 String content = String.join("\n",
-                        "Package: " + this.getProject().getName(),
-                        "Version: " + this.getArchiveVersion().getOrElse("0"),
-                        "License: unknown",
-                        "Vendor: vendor",
-                        "Architecture: all",
-                        "Maintainer: <root@localhost>",
-                        "Section: default",
-                        "Priority: extra",
-                        "Homepage: http://example.com/no-uri-given",
-                        "Description: no description given"
+                        "Package: " + extension.getPackageName().getOrElse(this.getProject().getName()),
+                        "Version: " + extension.getVersion().getOrElse("0"),
+                        "Section: " + extension.getSection().getOrElse("java"),
+                        "Priority: " + extension.getPriority().getOrElse("optional"),
+                        "Architecture: " + extension.getArchitecture().getOrElse("all"),
+                        "Maintainer: " + extension.getMaintainer().getOrElse("<root@localhost>"),
+                        "Description: " + extension.getPackageDescription().getOrElse("no description given")
                 );
 
                 control.createNewFile();
@@ -158,7 +155,6 @@ public class BuildDeb extends AbstractArchiveTask {
             } catch (IOException e) {
                 LOG.error("Failed to write debian control file.", e);
             }
-
         }
     }
 

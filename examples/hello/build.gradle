@@ -40,4 +40,12 @@ debian_packaging {
     installPath = '/opt/provider'
     postInstallFile = file('provisioning/debian/postinst')
     preUninstallFile = file('provisioning/debian/prerm')
+
+    packageName = 'hello-world'
+    version = '1.0'
+    section = 'java'
+    priority = 'optional'
+    architecture = 'all'
+    maintainer = '<root@localhost>'
+    description = 'A single line synopsis'
 }
