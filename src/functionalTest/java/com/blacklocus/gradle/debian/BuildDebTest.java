@@ -12,21 +12,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class BuildDebTest {
-    @Test
-    public void canRunTask() throws IOException {
-        // Setup the test build
-        File projectDir = new File("examples/hello");
 
-        // Run the build
+    private static final File TEST_PROJECT_DIR = new File("examples/hello");
+
+    @Test
+    public void canRunTask() {
         BuildResult result = GradleRunner.create()
                 .withPluginClasspath()
-                .withProjectDir(projectDir)
-                .withArguments("clean", "buildDeb")
-                .forwardOutput()
+                .withProjectDir(TEST_PROJECT_DIR)
+                .withArguments("buildDeb")
                 .build();
 
-        // Verify the result
-        assertTrue(result.getOutput().contains("buildDeb"));
+        assertTrue(result.getOutput().contains(BuildDeb.TASK_NAME));
         assertEquals(TaskOutcome.SUCCESS, result.task(":buildDeb").getOutcome());
     }
 }

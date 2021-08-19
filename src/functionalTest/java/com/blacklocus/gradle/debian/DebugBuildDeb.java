@@ -11,15 +11,14 @@ import java.io.File;
 @Ignore
 public class DebugBuildDeb {
 
+    private static final File TEST_PROJECT_DIR = new File("examples/hello");
+
     @Test
     public void debug() {
-        File testProjectDir = new File("examples/hello");
-
-        // Run the build
-        BuildResult result = GradleRunner.create()
+        GradleRunner.create()
                 .withPluginClasspath()
-                .withProjectDir(testProjectDir)
-                .withArguments("buildDeb", "--info")
+                .withProjectDir(TEST_PROJECT_DIR)
+                .withArguments("buildDeb", "--info", "--rerun-tasks")
                 .forwardOutput()
                 .withDebug(true)
                 .build();
