@@ -37,7 +37,7 @@ application {
 
 debian_packaging {
     provisioningDirectory = file('provisioning/root')
-    installPath = '/opt/provider'
+    installPath = '/opt'
     postInstallFile = file('provisioning/debian/postinst')
     preUninstallFile = file('provisioning/debian/prerm')
 
