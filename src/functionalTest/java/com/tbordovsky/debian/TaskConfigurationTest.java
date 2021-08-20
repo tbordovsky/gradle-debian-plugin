@@ -1,4 +1,4 @@
-package com.blacklocus.gradle.debian;
+package com.tbordovsky.debian;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class TaskConfigurationTest {
         writeStringToFile(new File(testProjectDir, "settings.gradle"), "");
         writeStringToFile(new File(testProjectDir, "build.gradle"), String.join("\n",
                 "plugins {",
-                "   id('com.blacklocus.gradle.debian')",
+                "   id('com.tbordovsky.debian')",
                 "}"
         ));
     }

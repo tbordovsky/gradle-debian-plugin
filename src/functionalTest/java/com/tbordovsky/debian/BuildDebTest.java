@@ -1,4 +1,4 @@
-package com.blacklocus.gradle.debian;
+package com.tbordovsky.debian;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;

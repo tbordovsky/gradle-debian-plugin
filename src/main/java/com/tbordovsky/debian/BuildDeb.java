@@ -1,4 +1,4 @@
-package com.blacklocus.gradle.debian;
+package com.tbordovsky.debian;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;

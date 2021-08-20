@@ -16,8 +16,8 @@ sourceSets.create('functionalTest')
 gradlePlugin {
     plugins {
         debian {
-            id = 'com.blacklocus.gradle.debian'
-            implementationClass = 'com.blacklocus.gradle.debian.DebianPlugin'
+            id = 'com.tbordovsky.debian'
+            implementationClass = 'com.tbordovsky.debian.DebianPlugin'
         }
     }
     testSourceSets(sourceSets.functionalTest) // inject gradleTestKit
