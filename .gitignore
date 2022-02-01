@@ -1,0 +1,28 @@
+# Only environment-specific things go here, such as a custom Java home
+gradle.properties
+
+# Ignore generated build descriptors
+build.properties
+
+#java specific
+*.class
+.gradle/*
+
+build/
+out/
+cache/
+target/
+
+# IDEA project files
+*.iml
+*.ipr
+*.iws
+*.ids
+.idea/
+.ideaDataSources/
+httpRequests/
+
+# Eclipse project files
+.settings/
+.classpath
+.project
