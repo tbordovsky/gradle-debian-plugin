@@ -1,5 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '0.16.0'
 }
 
 java {
@@ -11,12 +13,23 @@ repositories {
     mavenCentral()
 }
 
+group = 'com.tbordovsky'
+version = '1.0'
+
+pluginBundle {
+    website = 'https://github.com/travisbordovsky/gradle-debian-plugin'
+    vcsUrl = 'https://github.com/travisbordovsky/gradle-debian-plugin.git'
+    tags = ['deb', 'debian', 'jdeb']
+}
+
 sourceSets.create('functionalTest')
 
 gradlePlugin {
     plugins {
         debian {
             id = 'com.tbordovsky.debian'
+            displayName = 'Plugin for debian packaging of java applications'
+            description - 'A plugin that helps you create deb packages from java applications with minimal configuration'
             implementationClass = 'com.tbordovsky.debian.DebianPlugin'
         }
     }
