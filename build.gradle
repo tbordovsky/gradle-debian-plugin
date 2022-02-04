@@ -26,9 +26,10 @@ gradlePlugin {
 dependencies {
     implementation group: 'org.vafer', name: 'jdeb', version: '1.8'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:4.3.1'
 
-    functionalTestImplementation 'junit:junit:4.12'
+    functionalTestImplementation 'junit:junit:4.13.2'
     functionalTestImplementation(project)
 }
 
