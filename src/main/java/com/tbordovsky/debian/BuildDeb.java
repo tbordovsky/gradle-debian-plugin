@@ -148,6 +148,7 @@ public class BuildDeb extends AbstractArchiveTask {
                         "Description: " + extension.getPackageDescription().getOrElse("no description given")
                 );
 
+                // TODO: check the result
                 control.createNewFile();
                 FileWriter fw = new FileWriter(control.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
