@@ -112,6 +112,7 @@ public class BuildDeb extends AbstractArchiveTask {
         this.setDidWork(didWork.getDidWork());
 
         File controlDir = new File(this.getTemporaryDir(), ARCHIVE_CONTROL_PATH);
+        // TODO: check the result
         controlDir.mkdir();
         generateControlFile(controlDir, extension);
 
@@ -130,7 +131,7 @@ public class BuildDeb extends AbstractArchiveTask {
 
     @Override
     protected CopyAction createCopyAction() {
-        return new DebCopyAction(this.getTemporaryDir(), dataProducers);
+        return new DebCopyAction(this.getTemporaryDir(), dataProducers, ARCHIVE_CONTROL_PATH);
     }
 
     private void generateControlFile(File tmpDebianDir, DebianExtension extension) {

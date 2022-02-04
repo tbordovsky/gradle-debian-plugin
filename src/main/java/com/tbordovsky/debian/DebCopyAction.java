@@ -22,10 +22,12 @@ public class DebCopyAction implements CopyAction {
 
     private final File targetDir;
     private final List<DataProducer> dataProducers;
+    private final String archiveControlPath;
 
-    public DebCopyAction(File targetDir, List<DataProducer> dataProducers) {
+    public DebCopyAction(File targetDir, List<DataProducer> dataProducers, String archiveControlPath) {
         this.targetDir = targetDir;
         this.dataProducers = dataProducers;
+        this.archiveControlPath = archiveControlPath;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class DebCopyAction implements CopyAction {
         LOG.debug("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
 
-        if (!isControlFile(fileCopyDetails)) {
+        if (!isControlFile(fileCopyDetails, archiveControlPath)) {
             // this mapper is required in order to preserve the file mode
             Mapper mapper = new PermMapper(-1, -1, null, null, fileCopyDetails.getMode(), -1, -1, null);
             DataProducer dataProducer = new DataProducerFile(
@@ -66,9 +68,9 @@ public class DebCopyAction implements CopyAction {
         dataProducers.add(dataProducer);
     }
 
-    private static Boolean isControlFile(FileCopyDetailsInternal fileCopyDetails) {
+    private static Boolean isControlFile(FileCopyDetailsInternal fileCopyDetails, String archiveControlPath) {
         // comparing to relative paths, so take off the leading /
-        return fileCopyDetails.getPath().startsWith(BuildDeb.ARCHIVE_CONTROL_PATH.substring(1));
+        return fileCopyDetails.getPath().startsWith(archiveControlPath.substring(1));
     }
 
 }
