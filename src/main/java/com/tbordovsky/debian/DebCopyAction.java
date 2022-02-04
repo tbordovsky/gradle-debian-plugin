@@ -48,7 +48,7 @@ public class DebCopyAction implements CopyAction {
         LOG.debug("Copying {} to {}", fileCopyDetails, target);
         fileCopyDetails.copyTo(target);
 
-        if (!isControlFile(fileCopyDetails, archiveControlPath)) {
+        if (!isControlFile(fileCopyDetails.getPath(), archiveControlPath)) {
             // this mapper is required in order to preserve the file mode
             Mapper mapper = new PermMapper(-1, -1, null, null, fileCopyDetails.getMode(), -1, -1, null);
             DataProducer dataProducer = new DataProducerFile(
@@ -68,9 +68,9 @@ public class DebCopyAction implements CopyAction {
         dataProducers.add(dataProducer);
     }
 
-    private static Boolean isControlFile(FileCopyDetailsInternal fileCopyDetails, String archiveControlPath) {
+    protected static Boolean isControlFile(String filePath, String archiveControlPath) {
         // comparing to relative paths, so take off the leading /
-        return fileCopyDetails.getPath().startsWith(archiveControlPath.substring(1));
+        return filePath.startsWith(archiveControlPath.substring(1));
     }
 
 }
