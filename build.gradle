@@ -29,7 +29,7 @@ gradlePlugin {
         debian {
             id = 'com.tbordovsky.debian'
             displayName = 'Plugin for debian packaging of java applications'
-            description - 'A plugin that helps you create deb packages from java applications with minimal configuration'
+            description = 'A plugin that helps you create deb packages from java applications with minimal configuration'
             implementationClass = 'com.tbordovsky.debian.DebianPlugin'
         }
     }
