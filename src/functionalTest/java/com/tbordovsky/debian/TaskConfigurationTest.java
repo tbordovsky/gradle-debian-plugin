@@ -23,7 +23,7 @@ public class TaskConfigurationTest {
         writeStringToFile(new File(testProjectDir, "settings.gradle"), "");
         writeStringToFile(new File(testProjectDir, "build.gradle"), String.join("\n",
                 "plugins {",
-                "   id('com.tbordovsky.debian')",
+                "   id('io.github.tbordovsky.debian')",
                 "}"
         ));
     }
