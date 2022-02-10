@@ -13,7 +13,7 @@ repositories {
     mavenCentral()
 }
 
-group = 'com.tbordovsky'
+group = 'io.github.tbordovsky'
 version = '1.0'
 
 pluginBundle {
