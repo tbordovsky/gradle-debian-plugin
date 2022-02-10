@@ -1,4 +1,4 @@
-package com.tbordovsky.debian;
+package io.github.tbordovsky.debian;
 
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.api.Project;

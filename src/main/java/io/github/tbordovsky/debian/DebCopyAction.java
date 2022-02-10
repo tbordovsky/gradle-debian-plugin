@@ -1,4 +1,4 @@
-package com.tbordovsky.debian;
+package io.github.tbordovsky.debian;
 
 import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
