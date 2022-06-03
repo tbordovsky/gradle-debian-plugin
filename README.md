@@ -35,7 +35,7 @@ debian_packaging {
     priority = 'optional'
     architecture = 'all'
     maintainer = '<root@localhost>'
-    description = 'A single line synopsis'
+    packageDescription = 'A single line synopsis'
 }
 ```
 
