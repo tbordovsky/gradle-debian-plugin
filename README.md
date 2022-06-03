@@ -12,7 +12,7 @@ The project [examples](examples) provide a good reference for recommended usage.
 ```
 plugins {
     id 'application'
-    id 'io.github.tbordovsky.debian'
+    id 'io.github.tbordovsky.debian' version '1.0'
 }
 
 application {
